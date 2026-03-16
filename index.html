@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Password</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    input[type="password"] {
+      width: 220px;
+      padding: 0.7rem 1rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+      letter-spacing: 0.2em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="password"]:focus { border-color: #888; }
+
+    input[type="password"].shake {
+      border-color: #e05555;
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-7px); }
+      40%       { transform: translateX(7px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+
+    .error {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      color: #e05555;
+      font-family: sans-serif;
+      text-align: center;
+      min-height: 1rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .error.show { opacity: 1; }
+
+    #secret {
+      position: fixed;
+      bottom: 12px;
+      right: 16px;
+      font-family: sans-serif;
+      font-size: 0.78rem;
+      color: #333;
+      background: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    #secret.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div>
+    <input type="password" id="pw" placeholder="password" autocomplete="off" />
+    <p class="error" id="err">incorrect password</p>
+  </div>
+
+  <span id="secret"></span>
+
+  <script>
+    const CORRECT = '03042010';
+    const input = document.getElementById('pw');
+    const err   = document.getElementById('err');
+
+    input.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (input.value === CORRECT) {
+        window.location.href = 'correct.html';
+      } else {
+        err.classList.add('show');
+        input.classList.add('shake');
+        input.value = '';
+        setTimeout(() => input.classList.remove('shake'), 400);
+      }
+    });
+
+    // Secret key combo: Ctrl + Shift + A — flashes the answer for 3 seconds
+    const secret = document.getElementById('secret');
+    const answer = localStorage.getItem('answer');
+    if (answer) secret.textContent = 'answer: ' + answer;
+
+    let hideTimer;
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        if (!answer) secret.textContent = 'no answer yet';
+        secret.classList.add('visible');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => secret.classList.remove('visible'), 3000);
+      }
+    });
+  </script>
+</body>
+</html>

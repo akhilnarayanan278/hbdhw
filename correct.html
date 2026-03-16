@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>♡</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #fff8fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: Georgia, serif;
+    }
+
+    .rain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .drop {
+      position: absolute;
+      top: -4rem;
+      animation: fall linear infinite;
+      user-select: none;
+      line-height: 1;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(0); }
+      to   { transform: translateY(110vh); }
+    }
+
+    .drop.cell svg { display: block; }
+
+    .center {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+    }
+
+    .center p {
+      font-size: 1.15rem;
+      color: #5a2a3a;
+      line-height: 1.8;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      padding: 1.8rem 2rem;
+    }
+
+    /* Yes / No form */
+    .form {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(6px);
+      border-radius: 16px;
+      padding: 1.4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      width: 80px;
+      padding: 0.55rem 0;
+      border-radius: 50px;
+      border: 1.5px solid #e8a0b8;
+      background: #fff;
+      color: #5a2a3a;
+      font-family: Georgia, serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn:hover       { background: #fce4ef; }
+    .btn.selected    { background: #e8769a; color: #fff; border-color: #e8769a; }
+
+    .send-btn {
+      padding: 0.5rem 1.6rem;
+      border-radius: 50px;
+      border: none;
+      background: #e8769a;
+      color: #fff;
+      font-family: Georgia, serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .send-btn:hover    { background: #c94d74; }
+    .send-btn:disabled { background: #ddd; cursor: default; }
+
+    .thankyou {
+      font-size: 0.9rem;
+      color: #9c6678;
+      font-style: italic;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="rain" id="rain"></div>
+
+  <div class="center">
+    <p>heather,<br>
+    ILYSM<br>
+  Will you marry me one day?<br>
+Ok wait thats a little too fast <br>
+At least <br>
+Do you like me back??🥹🥹</p>
+
+
+    <div class="form" id="form">
+      <div class="buttons">
+        <button class="btn" id="btnNo"  onclick="pick('no')">No</button>
+        <button class="btn" id="btnYes" onclick="pick('yes')">Yes</button>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="send()" disabled>Send</button>
+      <span class="thankyou" id="thanks"> ♡</span>
+    </div>
+  </div>
+
+  <script>
+    // ---------- rain ----------
+    const rain = document.getElementById('rain');
+    const HEARTS = ['♥','♡','💗','💕','💖'];
+    const CELL_COLORS = ['#e8769a','#a78bcc','#7bbfdc','#6dbf9e','#f0a070'];
+
+    function cellSVG(size, color) {
+      const r = size / 2, nr = r * 0.28;
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="${r}" cy="${r}" rx="${r*.9}" ry="${r*.75}" fill="${color}" fill-opacity="0.18" stroke="${color}" stroke-width="1.2" stroke-opacity="0.45"/>
+        <ellipse cx="${r*1.05}" cy="${r*.95}" rx="${nr}" ry="${nr*.85}" fill="${color}" fill-opacity="0.35"/>
+      </svg>`;
+    }
+
+    for (let i = 0; i < 55; i++) {
+      const el = document.createElement('span');
+      el.className = 'drop';
+      const isCell = Math.random() < 0.35;
+      if (isCell) {
+        el.classList.add('cell');
+        const sz = 22 + Math.random() * 28;
+        el.innerHTML = cellSVG(sz, CELL_COLORS[Math.floor(Math.random() * CELL_COLORS.length)]);
+      } else {
+        el.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+        el.style.fontSize = (0.7 + Math.random() * 1.4) + 'rem';
+        el.style.color = `hsl(${330 + Math.random()*30}, 75%, 65%)`;
+        el.style.opacity = 0.5 + Math.random() * 0.5;
+      }
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.animationDuration = (7 + Math.random() * 11) + 's';
+      el.style.animationDelay = -(Math.random() * 16) + 's';
+      rain.appendChild(el);
+    }
+
+    // ---------- form ----------
+    let chosen = null;
+
+    function pick(val) {
+      chosen = val;
+      document.getElementById('btnYes').classList.toggle('selected', val === 'yes');
+      document.getElementById('btnNo').classList.toggle('selected', val === 'no');
+      document.getElementById('sendBtn').disabled = false;
+    }
+
+    function send() {
+      if (!chosen) return;
+      localStorage.setItem('answer', chosen);
+      document.getElementById('sendBtn').style.display = 'none';
+      document.getElementById('btnYes').disabled = true;
+      document.getElementById('btnNo').disabled = true;
+      document.getElementById('thanks').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
